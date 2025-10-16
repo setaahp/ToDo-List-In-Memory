@@ -50,8 +50,6 @@ todo_cli_app/
 
 │ ├── models.py # Data models for Project and Task
 
-│ └── constants.py # Configuration (MAX limits, etc.)
-
 ├── pyproject.toml # Poetry configuration file
 
 └── README.md
