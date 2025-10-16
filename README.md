@@ -37,12 +37,21 @@ This app helps you create, edit, and organize projects and their tasks — all f
 ## 🧱 Project Structure
 
 todo_cli_app/
+
 ├── todo_cli_app/
+
 │ ├── init.py
+
 │ ├── main.py # CLI entry point
+
 │ ├── project_manager.py # Project creation/edit/delete logic
+
 │ ├── task_manager.py # Task management logic
+
 │ ├── models.py # Data models for Project and Task
+
 │ └── constants.py # Configuration (MAX limits, etc.)
+
 ├── pyproject.toml # Poetry configuration file
+
 └── README.md
