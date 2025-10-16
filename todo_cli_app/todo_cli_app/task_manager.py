@@ -6,7 +6,7 @@ VALID_STATUSES = ["todo", "doing", "done"]
 
 class TaskManager:
     # (4)
-    def add_task(self, project: Project, title: str, description: str = "", status: str = "todo", deadline: str = None):
+    def add_task( self, project: Project, title: str, description: str = "", status: str = "todo", deadline: str | None = None):
         if len(project.tasks) >= MAX_NUMBER_OF_TASKS:
             print("❌ Error: Max number of tasks reached.")
             return
@@ -53,7 +53,7 @@ class TaskManager:
         print(f"🔄 Task '{task.title}' status changed to '{new_status}'.")
 
     # (6) 
-    def edit_task(self, project: Project, task_id: int, new_desc: str = None, new_deadline: str = None, new_status: str = None):
+    def edit_task(self, project: Project, task_id: int, new_desc: str | None = None, new_deadline: str | None = None, new_status: str | None = None):
         task = next((t for t in project.tasks if t.id == task_id), None)
         if not task:
             print("❌ Task not found.")
