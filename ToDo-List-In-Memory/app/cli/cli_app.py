@@ -3,7 +3,7 @@ from app.services.project_service import ProjectServiceDB
 from app.services.task_service import TaskServiceDB
 
 class CLIApp:
-    def __init__(self, project_service: ProjectService, task_service: TaskService):
+    def __init__(self, project_service: ProjectServiceDB, task_service: TaskServiceDB):
         self.project_service = project_service
         self.task_service = task_service
 
@@ -19,7 +19,10 @@ class CLIApp:
             print("7. Delete Task")
             print("8. List Projects")
             print("9. List Tasks of a Project")
+            print("10. Show Overdue Tasks")
+            print("11. Close Overdue Tasks Now")
             print("0. Exit")
+
             choice = input("> ")
 
             if choice == "1":
@@ -158,6 +161,40 @@ class CLIApp:
                     for t in tasks:
                         deadline_str = t.deadline.strftime("%Y-%m-%d") if t.deadline else "—"
                         print(f"  ID: {t.id} | {t.title} [{t.status}] | Deadline: {deadline_str}")
+                except ValueError as e:
+                    print(f"❌ {e}")
+            elif choice == "10":  # How overdue tasks
+                try:
+                    overdue_tasks = self.task_service.get_overdue_tasks()
+                    if not overdue_tasks:
+                        print("📭 No overdue tasks.")
+                    for t in overdue_tasks:
+                        deadline_str = t.deadline.strftime("%Y-%m-%d") if t.deadline else "—"
+                        print(f"  ID: {t.id} | {t.title} [{t.status}] | Deadline: {deadline_str}")
+                except ValueError as e:
+                    print(f"❌ {e}")
+
+            elif choice == "11":  # Close overdue tasks now
+                try:
+                    success, message = self.task_service.close_overdue_tasks()
+                    print(f"✅ {message}")
+                except ValueError as e:
+                    print(f"❌ {e}")
+            elif choice == "10":  # How overdue tasks
+                try:
+                    overdue_tasks = self.task_service.get_overdue_tasks()
+                    if not overdue_tasks:
+                        print("📭 No overdue tasks.")
+                    for t in overdue_tasks:
+                        deadline_str = t.deadline.strftime("%Y-%m-%d") if t.deadline else "—"
+                        print(f"  ID: {t.id} | {t.title} [{t.status}] | Deadline: {deadline_str}")
+                except ValueError as e:
+                    print(f"❌ {e}")
+
+            elif choice == "11":  # Close overdue tasks now
+                try:
+                    success, message = self.task_service.close_overdue_tasks()
+                    print(f"✅ {message}")
                 except ValueError as e:
                     print(f"❌ {e}")
 

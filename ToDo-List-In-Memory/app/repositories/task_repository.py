@@ -60,3 +60,14 @@ class TaskRepositoryDB:
         if not project:
             raise ValueError("Project not found")
         return self.db.query(Task).filter_by(project_id=project_id).order_by(Task.created_at).all()
+
+    def get_tasks_by_filter(self, filter_func):
+        """Return all tasks matching a filter function"""
+        tasks = self.db.query(Task).all()
+        return [t for t in tasks if filter_func(t)]
+
+    def save(self, task: Task):
+        self.db.add(task)
+        self.db.commit()
+        self.db.refresh(task)
+

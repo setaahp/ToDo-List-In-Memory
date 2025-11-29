@@ -6,6 +6,7 @@ from app.repositories.project_repository import ProjectRepositoryDB
 
 class ProjectServiceDB:
     def __init__(self, db_session: Session):
+        self.db = db_session
         self.repo = ProjectRepositoryDB(db_session)
 
     # --- Project CRUD ---
