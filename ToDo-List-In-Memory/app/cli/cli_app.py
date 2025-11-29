@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Optional
-from src.core.services import ToDoService
-from src.core.models import Project, Task
+from app.services.project_service import ProjectServiceDB
+from app.services.task_service import TaskServiceDB
 
 class CLIApp:
-    def __init__(self, service: ToDoService):
-        self.service = service
+    def __init__(self, project_service: ProjectService, task_service: TaskService):
+        self.project_service = project_service
+        self.task_service = task_service
 
     def run(self):
         while True:
@@ -26,7 +26,7 @@ class CLIApp:
                 name = input("Project name: ")
                 desc = input("Description: ")
                 try:
-                    project = self.service.create_project(name, desc)
+                    project = self.project_service.create_project(name, desc)
                     print(f"✅ Project '{project.title}' created with ID {project.id}!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -41,7 +41,7 @@ class CLIApp:
                 new_name = input("New project name: ")
                 new_desc = input("New description: ")
                 try:
-                    self.service.update_project(pid, new_name, new_desc)
+                    self.project_service.update_project(pid, new_name, new_desc)
                     print("✅ Project updated!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -54,7 +54,7 @@ class CLIApp:
                     print("❌ Invalid project ID")
                     continue
                 try:
-                    self.service.delete_project(pid)
+                    self.project_service.delete_project(pid)
                     print("🗑️ Project deleted!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -78,7 +78,7 @@ class CLIApp:
                 else:
                     deadline = None
                 try:
-                    task = self.service.add_task_to_project(pid, title, desc, deadline)
+                    task = self.task_service.add_task_to_project(pid, title, desc, deadline)
                     print(f"✅ Task '{task.title}' added with ID {task.id}!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -92,7 +92,7 @@ class CLIApp:
                     continue
                 new_status = input("New status (todo/doing/done): ")
                 try:
-                    self.service.change_task_status(tid, new_status)
+                    self.task_service.change_task_status(tid, new_status)
                     print("🔄 Task status updated!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -115,11 +115,11 @@ class CLIApp:
                 else:
                     new_deadline = None
                 try:
-                    task = self.service.get_task(tid)
+                    task = self.task_service.get_task(tid)
                     if not task:
                         print("❌ Task not found.")
                         continue
-                    self.service.update_task(tid, task.title, new_desc, new_deadline)
+                    self.task_service.update_task(tid, task.title, new_desc, new_deadline)
                     print("✏️ Task updated successfully!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -132,13 +132,13 @@ class CLIApp:
                     print("❌ Invalid task ID")
                     continue
                 try:
-                    self.service.delete_task(tid)
+                    self.task_service.delete_task(tid)
                     print("🗑️ Task deleted!")
                 except ValueError as e:
                     print(f"❌ {e}")
 
             elif choice == "8":
-                projects = self.service.list_projects()
+                projects = self.project_service.list_projects()
                 if not projects:
                     print("📭 No projects found.")
                 for p in projects:
@@ -152,7 +152,7 @@ class CLIApp:
                     print("❌ Invalid project ID")
                     continue
                 try:
-                    tasks = self.service.list_tasks_by_project(pid)
+                    tasks = self.task_service.list_tasks_by_project(pid)
                     if not tasks:
                         print("📭 No tasks for this project.")
                     for t in tasks:
