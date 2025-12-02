@@ -21,15 +21,17 @@ class ProjectRepositoryDB:
         self.db.refresh(project)
         return project
 
-    def update_project(self, project_id: int, new_title: str, new_desc: Optional[str]) -> Project:
+    def update_project(self, project_id: int, updates: dict) -> Project:
         project = self.db.query(Project).filter_by(id=project_id).first()
         if not project:
-            raise ValueError("Project not found")
-        project.title = new_title
-        project.description = new_desc
+            return None
+        for key, value in updates.items():
+            setattr(project, key, value)
+
         self.db.commit()
         self.db.refresh(project)
         return project
+
 
     def delete_project(self, project_id: int) -> bool:
         project = self.db.query(Project).filter_by(id=project_id).first()

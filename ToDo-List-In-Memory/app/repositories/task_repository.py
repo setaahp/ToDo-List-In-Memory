@@ -14,29 +14,34 @@ class TaskRepositoryDB:
     def add_task(self, project_id: int, task: Task) -> Task:
         project = self.db.query(Project).filter_by(id=project_id).first()
         if not project:
-            raise ValueError("Project not found")
+            return None
+
         task_count = self.db.query(Task).filter_by(project_id=project_id).count()
         if task_count >= MAX_NUMBER_OF_TASKS:
-            raise ValueError("Max tasks reached")
+            return None
+
         task.project_id = project.id
         self.db.add(task)
         self.db.commit()
         self.db.refresh(task)
         return task
 
+
     def get_task_by_id(self, task_id: int) -> Optional[Task]:
         return self.db.query(Task).filter_by(id=task_id).first()
 
-    def update_task(self, task_id: int, title: str, description: Optional[str], deadline: Optional[datetime] = None) -> Task:
+    def update_task(self, task_id: int, updates: dict) -> Task:
         task = self.get_task_by_id(task_id)
         if not task:
-            raise ValueError("Task not found")
-        task.title = title
-        task.description = description
-        task.deadline = deadline
+            return None
+
+        for key, value in updates.items():
+            setattr(task, key, value)
+
         self.db.commit()
         self.db.refresh(task)
         return task
+
 
     def delete_task(self, task_id: int) -> bool:
         task = self.get_task_by_id(task_id)

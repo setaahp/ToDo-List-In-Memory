@@ -14,8 +14,8 @@ class ProjectServiceDB:
         project = Project(title=title, description=description)
         return self.repo.add_project(project)
 
-    def update_project(self, project_id: int, new_title: str, new_desc: Optional[str] = None) -> Project:
-        return self.repo.update_project(project_id, new_title, new_desc)
+    def update_project(self, project_id: int, updates: dict) -> Project:
+        return self.repo.update_project(project_id, updates)
 
     def delete_project(self, project_id: int) -> bool:
         return self.repo.delete_project(project_id)
