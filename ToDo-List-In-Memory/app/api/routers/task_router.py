@@ -9,10 +9,10 @@ from app.services.task_service import TaskServiceDB
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
-@router.post("/", response_model=schemas.TaskOut, status_code=status.HTTP_201_CREATED)
-def create_task(payload: schemas.TaskCreate, db: Session = Depends(get_db)):
+@router.post("/projects/{project_id}/tasks", response_model=schemas.TaskOut, status_code=status.HTTP_201_CREATED)
+def create_task(project_id: int, payload: schemas.TaskCreate, db: Session = Depends(get_db)):
     svc = TaskServiceDB(db)
-    task = svc.create_task(payload.dict())
+    task = svc.add_task_to_project(project_id, payload.dict(exclude_unset=True))
     return task
 
 @router.get("/", response_model=List[schemas.TaskOut])

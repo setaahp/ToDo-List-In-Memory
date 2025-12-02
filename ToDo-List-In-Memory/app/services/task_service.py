@@ -5,10 +5,11 @@ from datetime import datetime
 from app.models.task import Task
 from app.repositories.task_repository import TaskRepositoryDB
 from app.repositories.project_repository import ProjectRepositoryDB
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 MAX_NUMBER_OF_TASKS = 10
-
+VALID_STATUSES = {"todo", "doing", "done"}
 
 class TaskServiceDB:
     def __init__(self, db_session: Session):
@@ -17,14 +18,7 @@ class TaskServiceDB:
         self.repo = TaskRepositoryDB(db_session)
 
     # Create task in a project
-    def add_task_to_project(
-        self,
-        project_id: int,
-        title: str,
-        description: Optional[str] = None,
-        deadline: Optional[datetime] = None
-    ) -> Task:
-
+    def add_task_to_project(self, project_id: int, data: dict) -> Task:
         project = self.project_repo.get_project_by_id(project_id)
         if not project:
             raise ValueError("Project not found")
@@ -34,23 +28,55 @@ class TaskServiceDB:
             raise ValueError("Max number of tasks reached")
 
         task = Task(
-            title=title,
-            description=description,
-            deadline=deadline,
+            title=data.get("title"),
+            description=data.get("description"),
+            deadline=data.get("deadline"),
             project_id=project_id
-        )
+    )
 
         return self.repo.add_task(project_id, task)
 
     # Update task
-    def update_task(
-        self,
-        task_id: int,
-        title: str,
-        description: Optional[str] = None,
-        deadline: Optional[datetime] = None
-    ) -> Task:
-        return self.repo.update_task(task_id, title, description, deadline)
+    def update_task(self, task_id: int, updates: dict) -> Task:
+        task = self.repo.get_task_by_id(task_id)
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+
+    # 1) STATUS VALIDATION
+        if "status" in updates:
+            new_status = updates["status"]
+
+        if new_status not in VALID_STATUSES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid status '{new_status}'. Allowed: {VALID_STATUSES}"
+            )
+
+        old_status = task.status
+
+        if old_status == "done":
+            raise HTTPException(
+                status_code=400,
+                detail="Completed tasks cannot be modified"
+            )
+
+        if old_status == "doing" and new_status == "todo":
+            raise HTTPException(
+                status_code=400,
+                detail="A task in 'doing' cannot be moved back to 'todo'"
+            )
+
+    # 2) DEADLINE VALIDATION
+        if "deadline" in updates:
+            if updates["deadline"] < datetime.now():
+                raise HTTPException(
+                status_code=400,
+                detail="Deadline cannot be in the past"
+            )
+
+    # 3) APPLY UPDATE
+        updated_task = self.repo.update_task(task_id, updates)
+        return updated_task
 
     # Get task
     def get_task(self, task_id: int) -> Optional[Task]:
