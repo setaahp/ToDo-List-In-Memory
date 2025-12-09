@@ -83,8 +83,8 @@ class TaskServiceDB:
         return self.repo.get_task_by_id(task_id)
 
     # Delete task
-    def delete_task(self, task_id: int) -> bool:
-        return self.repo.delete_task(task_id)
+    def delete_task(self, project_id: int, task_id: int) -> str:
+        return self.repo.delete_task(project_id, task_id)
 
     # Change task status
     def change_task_status(self, task_id: int, new_status: str) -> Task:
@@ -106,6 +106,15 @@ class TaskServiceDB:
         for task in overdue_tasks:
             task.status = "done"
             task.closed_at = datetime.now()
-            self.repo.update_task(task.id, task.title, task.description, task.deadline)
-        return True, f"{len(overdue_tasks)} overdue tasks closed."
 
+            updates = {
+                "title": task.title,
+                "description": task.description,
+                "deadline": task.deadline,
+                "status": task.status,
+                "closed_at": task.closed_at
+        }
+
+            self.repo.update_task(task.id, updates)
+
+        return True, f"{len(overdue_tasks)} overdue tasks closed."
