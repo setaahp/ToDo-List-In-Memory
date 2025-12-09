@@ -62,26 +62,34 @@ class CLIApp:
                 except ValueError as e:
                     print(f"❌ {e}")
 
-            elif choice == "4":
-                pid_input = input("Project ID: ")
+            elif choice == "4":  # Add Task
+                pid_input = input("Project ID: ").strip()
                 try:
                     pid = int(pid_input)
                 except ValueError:
                     print("❌ Invalid project ID")
                     continue
-                title = input("Task title: ")
-                desc = input("Task description: ")
-                deadline_input = input("Deadline (YYYY-MM-DD or empty): ")
-                if deadline_input:
+
+                title = input("Task title: ").strip()
+                desc = input("Task description: ").strip()
+
+                deadline_input = input("Deadline (YYYY-MM-DD or empty): ").strip()
+                if deadline_input == "":
+                    deadline = None
+                else:
                     try:
                         deadline = datetime.strptime(deadline_input, "%Y-%m-%d")
                     except ValueError:
                         print("❌ Invalid date format! Use YYYY-MM-DD.")
                         continue
-                else:
-                    deadline = None
+                task_data = {
+                    "title": title,
+                    "description": desc,
+                    "deadline": deadline
+                }
+
                 try:
-                    task = self.task_service.add_task_to_project(pid, title, desc, deadline)
+                    task = self.task_service.add_task_to_project(pid, task_data)
                     print(f"✅ Task '{task.title}' added with ID {task.id}!")
                 except ValueError as e:
                     print(f"❌ {e}")
@@ -100,29 +108,37 @@ class CLIApp:
                 except ValueError as e:
                     print(f"❌ {e}")
 
-            elif choice == "6":
-                tid_input = input("Task ID: ")
+            elif choice == "6":  # Edit Task
+                tid_input = input("Task ID: ").strip()
                 try:
                     tid = int(tid_input)
                 except ValueError:
                     print("❌ Invalid task ID")
                     continue
-                new_desc = input("New description (or empty): ") or None
-                new_deadline_input = input("New deadline (YYYY-MM-DD or empty): ")
-                if new_deadline_input:
+
+                new_desc = input("New description (or empty to keep current): ").strip() or None
+
+                new_deadline_input = input("New deadline (YYYY-MM-DD or empty): ").strip()
+                if new_deadline_input == "":
+                    new_deadline = None
+                else:
                     try:
                         new_deadline = datetime.strptime(new_deadline_input, "%Y-%m-%d")
                     except ValueError:
                         print("❌ Invalid date format! Use YYYY-MM-DD.")
                         continue
-                else:
-                    new_deadline = None
+                updates = {}
+                if new_desc is not None:
+                    updates["description"] = new_desc
+                updates["deadline"] = new_deadline
+
+
                 try:
                     task = self.task_service.get_task(tid)
                     if not task:
                         print("❌ Task not found.")
                         continue
-                    self.task_service.update_task(tid, task.title, new_desc, new_deadline)
+                    self.task_service.update_task(tid, updates)
                     print("✏️ Task updated successfully!")
                 except ValueError as e:
                     print(f"❌ {e}")
